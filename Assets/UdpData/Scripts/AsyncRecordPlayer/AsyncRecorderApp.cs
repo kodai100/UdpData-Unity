@@ -67,18 +67,16 @@ public class AsyncRecorderApp : MonoBehaviour
         remotePort = sender.remotePort;
         localPort = server.localPort;
         oscPort = oscServer.localPort;
-
-        var x = Screen.width / 2f - windowWidth / 2f;
-        var y = Screen.height / 2f - windowHeight / 2f;
-        windowRect = new Rect(new Vector2(x, y), new Vector2(windowWidth, windowHeight));
+        
+        windowRect = WindowUtility.CalculateCenteredWindowRect(windowWidth, windowHeight);
 
         recorder = GetComponent<AsyncRecordPlayer>();
 
         parentFolder = Path.Combine(Application.streamingAssetsPath, "udpData");
+
         if (!Directory.Exists(parentFolder))
             Directory.CreateDirectory(parentFolder);
     }
-
 
     private void OnGUI()
     {
@@ -92,18 +90,44 @@ public class AsyncRecorderApp : MonoBehaviour
 
         GUILayout.Space(4);
 
+        FolderPathArea();
+
+        FileNameArea();
+
+        GUILayout.Space(16);
+
+        PlayButotnArea();
+        StopButtonArea();
+
+        ErrorArea();
+
+        GUILayout.Space(16);
+
+        FileSizeArea();
+
+        GUI.DragWindow();
+    }
+
+    
+    void FolderPathArea()
+    {
         GUILayout.Label("FolderPath:");
         if (GUILayout.Button(parentFolder))
             OpenInFileBrowser.Open(parentFolder);
+    }
 
+    void FileNameArea()
+    {
         GUILayout.BeginHorizontal();
         GUILayout.Label("FileName: ");
         fileName = GUILayout.TextField(fileName, GUILayout.Width(320));
         GUILayout.Label(fileExtension);
         GUILayout.EndHorizontal();
+    }
 
-        GUILayout.Space(16);
-
+    // プレイボタンorレコードボタンを表示
+    void PlayButotnArea()
+    {
         var filePath = Path.Combine(parentFolder, fileName + fileExtension);
         var exist = File.Exists(filePath);
 
@@ -123,7 +147,12 @@ public class AsyncRecorderApp : MonoBehaviour
             if (GUILayout.Button("/record"))
                 recorder.StartRecording();
         }
+        
+    }
 
+    void StopButtonArea()
+    {
+        // レコード開始すると現れる
         if ((recorder.playing || recorder.recording))
         {
             if (GUILayout.Button("/stop"))
@@ -145,19 +174,28 @@ public class AsyncRecorderApp : MonoBehaviour
         }
         else
         {
-            GUILayout.Space(16);
-            GUILayout.BeginVertical("box");
-            if (SetIpField("Remote IP: ", ref remoteIp) || SetPortField("Remote Port", ref remotePort))
-                sender.CreateRemoteEP(remoteIp, remotePort);
-            GUILayout.Space(8);
-            if (SetPortField("Local Port: ", ref localPort))
-                server.StartServer(localPort);
-            GUILayout.Space(8);
-            if (SetPortField("OSC Port: ", ref oscPort))
-                oscServer.StartServer(oscPort);
-            GUILayout.EndVertical();
+            PortField();
         }
+    }
 
+
+    void PortField()
+    {
+        GUILayout.Space(16);
+        GUILayout.BeginVertical("box");
+        if (SetIpField("Remote IP: ", ref remoteIp) || SetPortField("Remote Port", ref remotePort))
+            sender.CreateRemoteEP(remoteIp, remotePort);
+        GUILayout.Space(8);
+        if (SetPortField("Local Port: ", ref localPort))
+            server.StartServer(localPort);
+        GUILayout.Space(8);
+        if (SetPortField("OSC Port: ", ref oscPort))
+            oscServer.StartServer(oscPort);
+        GUILayout.EndVertical();
+    }
+
+    void ErrorArea()
+    {
         if (0 < error.Length)
         {
             var color = GUI.color;
@@ -165,8 +203,10 @@ public class AsyncRecorderApp : MonoBehaviour
             GUILayout.Label(error);
             GUI.color = color;
         }
+    }
 
-        GUILayout.Space(16);
+    void FileSizeArea()
+    {
         if (recorder.playing || recorder.recording)
         {
             var fileSize = (float)recorder.fileSize;
@@ -190,9 +230,9 @@ public class AsyncRecorderApp : MonoBehaviour
             GUILayout.Label(fileSize.ToString(".000") + unit);
             GUILayout.EndHorizontal();
         }
-
-        GUI.DragWindow();
     }
+
+    
 
     bool SetIpField(string label, ref string ip)
     {
@@ -206,6 +246,9 @@ public class AsyncRecorderApp : MonoBehaviour
         ip = str;
         return true;
     }
+
+
+
     bool SetPortField(string label, ref int port)
     {
         GUILayout.BeginHorizontal();
