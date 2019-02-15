@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using UnityEngine;
 using UnityEngine.Events;
 
+// UDPの受信サーバーを構築するクラス
 public abstract class UdpServer : MonoBehaviour
 {
     public int localPort = 8888;
@@ -15,15 +16,18 @@ public abstract class UdpServer : MonoBehaviour
     Thread reader;
     byte[] receiveBuffer;
 
+    // サーバーの起動
     public void StartServer(int port)
     {
-        StopServer();
+        StopServer();   // 一回止める
 
+        // ソケットを開く
         udp = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 
         localPort = port;
         udp.Bind(new IPEndPoint(IPAddress.Any, localPort));
 
+        // 別スレッドでリッスン
         reader = new Thread(Reader);
         reader.Start();
     }
@@ -32,20 +36,26 @@ public abstract class UdpServer : MonoBehaviour
     {
         if (udp != null)
         {
+            // ソケットを閉じて
             udp.Close();
             udp = null;
         }
         if (reader != null)
         {
+            // スレッドを停止する
             reader.Abort();
-            reader.Join();
+            reader.Join();  // 終了を待ち合わせ
             reader = null;
         }
     }
 
+
+    /// <summary>
+    /// MonoBehaviour
+    /// </summary>
     void Start()
     {
-        receiveBuffer = new byte[1 << 16];
+        receiveBuffer = new byte[1 << 16];  // 16ビット確保
         StartServer(localPort);
     }
 
@@ -54,9 +64,12 @@ public abstract class UdpServer : MonoBehaviour
         StopServer();
     }
 
+    // 受信したUDPを読む別スレッドの関数
     void Reader()
     {
         var clientEndpoint = new IPEndPoint(IPAddress.Any, 0);
+
+        // ソケットが開いていて
         while (udp != null && udp.IsBound)
         {
             try
@@ -73,6 +86,7 @@ public abstract class UdpServer : MonoBehaviour
         }
     }
 
+    // インタフェースにすればいい
     protected abstract void OnReadPacket(byte[] buffer, int length, IPEndPoint source);
 
     protected virtual void OnRaiseError(System.Exception e)

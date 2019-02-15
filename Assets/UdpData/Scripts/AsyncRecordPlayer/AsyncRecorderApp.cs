@@ -107,14 +107,14 @@ public class AsyncRecorderApp : MonoBehaviour
         var filePath = Path.Combine(parentFolder, fileName + fileExtension);
         var exist = File.Exists(filePath);
 
-        if (exist && !recorder.playing && !recorder.recording)
+        if (exist && !recorder.player.IsPlaying && !recorder.recorder.IsRecording)
         {
             recorder.playFilePath = filePath;
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("/play"))
                 recorder.Play();
             if (GUILayout.Button("create playData"))
-                recorder.CreatePlayData();
+                recorder.player.CreatePlayData();
             GUILayout.EndHorizontal();
         }
         else if (!exist && !recorder.recording)
@@ -183,8 +183,8 @@ public class AsyncRecorderApp : MonoBehaviour
             }
 
             GUILayout.BeginHorizontal();
-            GUILayout.Label(recorder.playing ? "playing: " : "recording: ");
-            GUILayout.Label(recorder.time.ToString(), GUILayout.Width(200));
+            GUILayout.Label(recorder.player.IsPlaying ? "playing: " : "recording: ");
+            GUILayout.Label(recorder.player.time.ToString(), GUILayout.Width(200));
             GUILayout.FlexibleSpace();
             GUILayout.Label("file size: ");
             GUILayout.Label(fileSize.ToString(".000") + unit);

@@ -4,12 +4,21 @@ using System.Threading;
 using System.IO;
 using UnityEngine;
 
+// 機能が単一じゃないので分けていく。
+// ・Sender
+// ・Recorder
 public class UdpRecordPlayer : MonoBehaviour
 {
+    [Header("For send Recorded data")]
+    // データを再生して送る時用
     public UdpSender sender;
-    Queue<TimeDataPair> recordQueue = new Queue<TimeDataPair>();
+
+    
+    // レコード
+    [Header("For Record")]
     public string recordFilePath = "udpRec.data";
     public string playFilePath = "recordedUdp/recorded.udp";
+    Queue<TimeDataPair> recordQueue = new Queue<TimeDataPair>();
 
     Thread recorder;
     Thread player;

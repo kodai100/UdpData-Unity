@@ -6,7 +6,7 @@ using UnityEngine;
 using FileUtility;
 
 [RequireComponent(typeof(UdpRecordPlayer))]
-public class RecorderApp : MonoBehaviour
+public class RecorderWindow : MonoBehaviour
 {
 
     public int windowWidth = 768;
