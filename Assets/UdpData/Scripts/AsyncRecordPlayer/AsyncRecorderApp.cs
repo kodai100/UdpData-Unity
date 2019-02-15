@@ -68,9 +68,8 @@ public class AsyncRecorderApp : MonoBehaviour
         localPort = server.localPort;
         oscPort = oscServer.localPort;
 
-        var x = Screen.width / 2f - windowWidth / 2f;
-        var y = Screen.height / 2f - windowHeight / 2f;
-        windowRect = new Rect(new Vector2(x, y), new Vector2(windowWidth, windowHeight));
+
+        windowRect = WindowUtility.CalculateCenteredWindowRect(windowWidth, windowHeight);
 
         recorder = GetComponent<AsyncRecordPlayer>();
 
